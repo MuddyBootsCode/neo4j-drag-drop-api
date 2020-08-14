@@ -20,7 +20,7 @@ const driver = neo4j.driver(
   process.env.NEO4J_URI || 'bolt://localhost:7687',
   neo4j.auth.basic(
     process.env.NEO4J_USER || 'neo4j',
-    process.env.NEO4J_PASSWORD || 'neo4j'
+    process.env.NEO4J_PASSWORD || 'localgraph'
   ),
   {
     encrypted: process.env.NEO4J_ENCRYPTED ? 'ENCRYPTION_ON' : 'ENCRYPTION_OFF',
@@ -29,6 +29,11 @@ const driver = neo4j.driver(
 
 const augmentedSchema = makeAugmentedSchema({
   typeDefs,
+  config: {
+    auth: {
+      isAuthenticated: true,
+    }
+  }
 })
 /*
  * Create a new ApolloServer instance, serving the GraphQL schema
@@ -37,7 +42,9 @@ const augmentedSchema = makeAugmentedSchema({
  * generated resolvers to connect to the database.
  */
 const server = new ApolloServer({
-  context: { driver, neo4jDatabase: process.env.NEO4J_DATABASE },
+  context: ({ req }) => {
+    return { req, driver, neo4jDatabase: process.env.NEO4J_DATABASE }
+  },
   schema: augmentedSchema,
   introspection: true,
   playground: true,
