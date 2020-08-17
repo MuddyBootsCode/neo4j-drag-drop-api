@@ -3,3 +3,23 @@ id: ID!
 firstName: String!
 lastName: String!
 }
+
+type Task {
+    id: ID!
+    content: String!
+    column: Column @relation(name: "BELONGS_TO", direction: "OUT")
+}
+
+type Column {
+    id: ID!
+    title: String!
+    tasks: [Task] @relation(name: "BELONGS_TO", direction: "IN")
+    table: Table @relation(name: "BELONGS_TO", direction: "OUT")
+    taskIds: [String]
+}
+
+type Table {
+    id: ID!
+    title: String!
+    columns: [Column] @relation(name: "BELONGS_TO", direction: "IN")
+}
