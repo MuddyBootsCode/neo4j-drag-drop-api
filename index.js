@@ -1,20 +1,14 @@
 import { typeDefs } from './graphql-schema'
-import { ApolloServer } from 'apollo-server-express'
-import express from 'express'
+import {ApolloServer, PubSub, SchemaDirectiveVisitor} from 'apollo-server'
 import neo4j from 'neo4j-driver'
 import { makeAugmentedSchema } from 'neo4j-graphql-js'
 import dotenv from 'dotenv'
+// import { IsPublishedDirective } from "./directives";
+import {DirectiveLocation, GraphQLDirective} from "graphql";
 
 // set environment variables from .env
 dotenv.config()
 
-const app = express()
-
-/*
- * Create a Neo4j driver instance to connect to the database
- * using credentials specified as environment variables
- * with fallback to defaults
- */
 
 const driver = neo4j.driver(
   process.env.NEO4J_URI || 'bolt://localhost:7687',
@@ -27,8 +21,100 @@ const driver = neo4j.driver(
   }
 )
 
+const pubsub = new PubSub();
+
+export class SubscribeDirective extends SchemaDirectiveVisitor {
+  visitFieldDefinition(field) {
+    field.subscribe = () => pubsub.asyncIterator(field.name);
+  }
+
+  visitObject(object) {
+    console.log(object, ' from sub')
+    return super.visitObject(object);
+  }
+}
+
+export class PublishDirective extends SchemaDirectiveVisitor {
+  visitFieldDefinition(field) {
+    const { to } = this.args;
+    const { resolve } = field;
+    field.resolve = (...args) => {
+      const data = resolve.apply(this, args);
+      pubsub.publish(to, { [to]: data });
+      return data;
+    };
+  }
+
+  visitObject(object) {
+    const { to } = this.args;
+    console.log(to, this.args, ' from the top')
+    const fields = object.getFields();
+    Object.keys(fields).forEach((fieldName) => {
+      const field = fields[fieldName];
+      // console.log(field)
+      const next = field.resolve;
+
+      field.resolve = (result, args, context, info) => {
+        console.log(args, 'args')
+        console.log(result, ' Result')
+        pubsub.publish(to, {[to]: result})
+        // console.log(args)
+        // console.log(context)
+        // console.log(info)
+        return next(result, args, context, info);
+      }
+    })
+  }
+}
+
+export class IsPublishedDirective extends SchemaDirectiveVisitor {
+  static getDirectiveDeclaration(directiveName, schema) {
+    return new GraphQLDirective({
+      name: 'isPublished',
+      locations: [DirectiveLocation.FIELD_DEFINITION, DirectiveLocation.OBJECT]
+    });
+  }
+
+  visitObject(obj) {
+    const fields = obj.getFields();
+    console.log(this.args, ' upper Args')
+
+    Object.keys(fields).forEach((fieldName) => {
+      const field = fields[fieldName];
+      const next = field.resolve;
+
+      field.resolve = (result, args, context, info) => {
+        // console.log(args, ' Args')
+        console.log(context.req.body, ' request body')
+        console.log(result, ' Result')
+        // console.log(info, ' info')
+        return next(result, args, context, info);
+      }
+    })
+  }
+
+  visitFieldDefinition(field) {
+    const next = field.resolve;
+    console.log(field.astNode.type);
+
+    field.resolve = function(result, args, context, info) {
+      // console.log(result);
+      // console.log(args);
+      // console.log(context);
+      // console.log(info);
+      return next(result, args, context, info);
+    };
+  }
+}
+
 const augmentedSchema = makeAugmentedSchema({
   typeDefs,
+  schemaDirectives: {
+    isPublished: IsPublishedDirective,
+    subscribe: SubscribeDirective,
+    publish: PublishDirective
+
+  },
   config: {
     auth: {
       isAuthenticated: true,
@@ -50,17 +136,6 @@ const server = new ApolloServer({
   playground: true,
 })
 
-// Specify host, port and path for GraphQL endpoint
-const port = process.env.GRAPHQL_SERVER_PORT || 4001
-const path = process.env.GRAPHQL_SERVER_PATH || '/graphql'
-const host = process.env.GRAPHQL_SERVER_HOST || '0.0.0.0'
-
-/*
- * Optionally, apply Express middleware for authentication, etc
- * This also also allows us to specify a path for the GraphQL endpoint
- */
-server.applyMiddleware({ app, path })
-
-app.listen({ host, port, path }, () => {
-  console.log(`GraphQL server ready at http://${host}:${port}${path}`)
+server.listen().then(({ url })=> {
+  console.log(`GraphQL server ready at ${url}`)
 })
