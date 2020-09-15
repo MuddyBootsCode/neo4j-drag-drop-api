@@ -38,16 +38,4 @@ type Mutation {
     @cypher (
         statement: "CREATE (t:Task { id: randomUUID(), content: $taskContent }) with t MATCH(c:Column {id: $columnId}) CREATE(c)<-[:BELONGS_TO]-(t) set c.taskIds = c.taskIds + t.id return t"
     )
-
-    swapTask(fromColumnId: ID!, toColumnId: ID!, taskId: ID!): Column
-    @cypher (
-        statement:
-        "MATCH (c1:Column {id: $fromColumnId})<-[r]-(t:Task {id: $taskId}) SET c1.taskIds = [x IN c1.taskIds where x <> $taskId] DELETE r WITH t MATCH (c2:Column {id: $toColumnId}) CREATE (c2)<-[:BELONGS_TO]-(t) SET c2.taskIds = c2.taskIds + t.id RETURN c2"
-    )
-
-    updateTaskOrder(oldId: ID!, newId: ID!): Task
-    @cypher (
-        statement:
-        "MATCH (c1:Column {id: $fromColumnId})<-[r]-(t:Task {id: $taskId}) SET c1.taskIds = [x IN c1.taskIds where x <> $taskId] DELETE r WITH t, table MATCH (c2:Column {id: $toColumnId}) CREATE (c2)<-[:BELONGS_TO]-(t) SET c2.taskIds = c2.taskIds + t.id RETURN c2"
-    )
 }
