@@ -1,4 +1,3 @@
-directive @isPublished(to: String!) on FIELD_DEFINITION | OBJECT
 directive @subscribe on FIELD_DEFINITION
 directive @publish(to: String!) on FIELD_DEFINITION | OBJECT
 
@@ -12,6 +11,9 @@ type Task {
     id: ID!
     content: String!
     column: Column @relation(name: "BELONGS_TO", direction: "OUT")
+    columnName: String @cypher (
+        statement: "MATCH (this)-[:BELONGS_TO]->(c:Column) return c.title"
+    )
 }
 
 type Column {
@@ -30,11 +32,12 @@ type Table {
 }
 
 type Subscription {
-    taskAdded: Task
+    taskAdded: Task @subscribe
+    autoTaskAdded: Task @subscribe
 }
 
 type Mutation {
-    addTask(taskContent: String!, columnId: ID!): Task
+    addTask(taskContent: String!, columnId: ID!): Task  @publish(to: "taskAdded")
     @cypher (
         statement: "CREATE (t:Task { id: randomUUID(), content: $taskContent }) with t MATCH(c:Column {id: $columnId}) CREATE(c)<-[:BELONGS_TO]-(t) set c.taskIds = c.taskIds + t.id return t"
     )
