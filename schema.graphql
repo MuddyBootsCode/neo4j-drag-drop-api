@@ -37,8 +37,8 @@ type Subscription {
 }
 
 type Mutation {
-    addTask(taskContent: String!, columnId: ID!): Task  @publish(to: "taskAdded")
+    addTask(taskContent: String!, columnId: ID!, taskId: ID!): Task
     @cypher (
-        statement: "CREATE (t:Task { id: randomUUID(), content: $taskContent }) with t MATCH(c:Column {id: $columnId}) CREATE(c)<-[:BELONGS_TO]-(t) set c.taskIds = c.taskIds + t.id return t"
+        statement: "CREATE (t:Task { id: $taskId, content: $taskContent }) with t MATCH(c:Column {id: $columnId}) CREATE(c)<-[:BELONGS_TO]-(t) set c.taskIds = c.taskIds + t.id return t"
     )
 }
