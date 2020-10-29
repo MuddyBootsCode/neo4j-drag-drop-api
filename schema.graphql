@@ -11,9 +11,6 @@ type Task {
     id: ID!
     content: String!
     column: Column @relation(name: "BELONGS_TO", direction: "OUT")
-    columnName: String @cypher (
-        statement: "MATCH (this)-[:BELONGS_TO]->(c:Column) return c.title"
-    )
 }
 
 type Column {
@@ -33,11 +30,10 @@ type Table {
 
 type Subscription {
     taskAdded: Task @subscribe
-    autoTaskAdded: Task @subscribe
 }
 
 type Mutation {
-    addTask(taskContent: String!, columnId: ID!, taskId: ID!): Task
+    addTask(taskContent: String!, columnId: ID!, taskId: ID!): Task @publish(to: "taskAdded")
     @cypher (
         statement: "CREATE (t:Task { id: $taskId, content: $taskContent }) with t MATCH(c:Column {id: $columnId}) CREATE(c)<-[:BELONGS_TO]-(t) set c.taskIds = c.taskIds + t.id return t"
     )

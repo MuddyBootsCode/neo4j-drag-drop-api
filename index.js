@@ -1,20 +1,32 @@
 import { typeDefs } from './graphql-schema'
-import {ApolloServer, PubSub, SchemaDirectiveVisitor} from 'apollo-server'
+import {PubSub, SchemaDirectiveVisitor} from 'apollo-server'
 import neo4j from 'neo4j-driver'
 import { makeAugmentedSchema } from 'neo4j-graphql-js'
 import dotenv from 'dotenv'
-// import { IsPublishedDirective } from "./directives";
-import {DirectiveLocation, GraphQLDirective} from "graphql";
+import http from 'http';
+import { ApolloServer } from 'apollo-server-express'
+import express from 'express'
+
+const PORT = 4000;
+const app = express();
+
 
 // set environment variables from .env
 dotenv.config()
 
+const develop = process.env.NODE_EVN === 'development';
+
+const userName = develop ? process.env.NEO4J_USER : 'neo4j';
+const passWord = develop ? process.env.NEO4J_PASSWORD : 'localgraph';
+const URI = develop ? process.env.NEO4J_URI : 'bolt://localhost:7687';
+
+console.log(userName, passWord, URI);
 
 const driver = neo4j.driver(
-  process.env.NEO4J_URI || 'bolt://localhost:7687',
+  URI,
   neo4j.auth.basic(
-    process.env.NEO4J_USER || 'neo4j',
-    process.env.NEO4J_PASSWORD || 'localgraph'
+    userName,
+    passWord
   ),
   {
     encrypted: process.env.NEO4J_ENCRYPTED ? 'ENCRYPTION_ON' : 'ENCRYPTION_OFF',
@@ -73,6 +85,7 @@ const augmentedSchema = makeAugmentedSchema({
   }
 })
 
+
 const server = new ApolloServer({
   context: ({ req }) => {
     return { req, driver, neo4jDatabase: process.env.NEO4J_DATABASE }
@@ -82,6 +95,16 @@ const server = new ApolloServer({
   playground: true,
 })
 
-server.listen().then(({ url })=> {
-  console.log(`GraphQL server ready at ${url}`)
+const port = process.env.GRAPHQL_SERVER_PORT || 4000
+const path = process.env.GRAPHQL_SERVER_PATH || '/graphql'
+const host = process.env.GRAPHQL_SERVER_HOST || '0.0.0.0'
+
+server.applyMiddleware({app, path})
+
+const httpServer = http.createServer(app);
+server.installSubscriptionHandlers(httpServer);
+
+httpServer.listen({ host, port, path}, () => {
+  console.log(`GraphQL server ready at http://${host}:${port}${path}`)
+  console.log(`🚀 Subscriptions ready at ws://${host}:${PORT}${server.subscriptionsPath}`)
 })
