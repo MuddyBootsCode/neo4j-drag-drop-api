@@ -20,8 +20,6 @@ const userName = develop ? process.env.NEO4J_USER : 'neo4j';
 const passWord = develop ? process.env.NEO4J_PASSWORD : 'localgraph';
 const URI = develop ? process.env.NEO4J_URI : 'bolt://localhost:7687';
 
-console.log(userName, passWord, URI);
-
 const driver = neo4j.driver(
   URI,
   neo4j.auth.basic(
