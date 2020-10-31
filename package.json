@@ -9,6 +9,7 @@
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "try": "DEBUG=neo4j-graphql-js NODE_ENV=production ./node_modules/.bin/nodemon --watch src --ext js,graphql --exec babel-node  index.js",
     "dev": "DEBUG=neo4j-graphql-js NODE_ENV=development ./node_modules/.bin/nodemon --watch src --ext js,graphql --exec babel-node  index.js",
     "clean": "rm -rf build && mkdir build",
     "build-babel": "babel -d ./build index.js graphql-schema.js",

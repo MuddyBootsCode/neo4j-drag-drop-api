@@ -18,8 +18,6 @@ const userName = develop ? process.env.NEO4J_USER : 'neo4j';
 const passWord = develop ? process.env.NEO4J_PASSWORD : 'localgraph';
 const URI = develop ? process.env.NEO4J_URI : 'bolt://localhost:7687';
 
-console.log(URI, develop);
-
 const driver = neo4j.driver(
   URI,
   neo4j.auth.basic(
@@ -27,7 +25,7 @@ const driver = neo4j.driver(
     passWord
   ),
   {
-    encrypted: process.env.NEO4J_ENCRYPTED ? 'ENCRYPTION_ON' : 'ENCRYPTION_OFF',
+    encrypted: process.env.NEO4J_ENCRYPTED ? 'ENCRYPTION_OFF' : 'ENCRYPTION_ON',
   }
 )
 
@@ -102,7 +100,10 @@ server.applyMiddleware({app, path})
 const httpServer = http.createServer(app);
 // server.installSubscriptionHandlers(httpServer);
 
+const { GRAPHQL_SERVER_PORT, GRAPHQL_SERVER_PATH, GRAPHQL_SERVER_HOST } = process.env;
+console.log(GRAPHQL_SERVER_HOST, GRAPHQL_SERVER_PATH, GRAPHQL_SERVER_PORT)
+
 httpServer.listen({ host, port, path}, () => {
-  console.log(`GraphQL server ready at http://${host}:${port}${path}`)
+  console.log(`GraphQL server ready at https://${host}:${port}${path}`)
   // console.log(`🚀 Subscriptions ready at ws://${host}:${PORT}${server.subscriptionsPath}`)
 })
