@@ -7,9 +7,7 @@ import http from 'http';
 import { ApolloServer } from 'apollo-server-express'
 import express from 'express'
 
-const PORT = 4000;
 const app = express();
-
 
 // set environment variables from .env
 dotenv.config()
@@ -102,9 +100,9 @@ const host = process.env.GRAPHQL_SERVER_HOST || '0.0.0.0'
 server.applyMiddleware({app, path})
 
 const httpServer = http.createServer(app);
-server.installSubscriptionHandlers(httpServer);
+// server.installSubscriptionHandlers(httpServer);
 
 httpServer.listen({ host, port, path}, () => {
   console.log(`GraphQL server ready at http://${host}:${port}${path}`)
-  console.log(`🚀 Subscriptions ready at ws://${host}:${PORT}${server.subscriptionsPath}`)
+  // console.log(`🚀 Subscriptions ready at ws://${host}:${PORT}${server.subscriptionsPath}`)
 })
