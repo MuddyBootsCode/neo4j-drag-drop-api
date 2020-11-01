@@ -12,20 +12,14 @@ const app = express();
 // set environment variables from .env
 dotenv.config()
 
-const develop = process.env.NODE_EVN === 'development';
-
-const userName = develop ? 'neo4j' : process.env.NEO4J_USER;
-const passWord = develop ? 'localgraph' : process.env.NEO4J_PASSWORD;
-const URI = develop ? 'bolt://localhost:7687' : process.env.NEO4J_URI;
-
 const driver = neo4j.driver(
-  URI,
+  process.env.NEO4J_URI || 'bolt://localhost:7687',
   neo4j.auth.basic(
-    userName,
-    passWord
+    process.env.NEO4J_USER || 'neo4j',
+    process.env.NEO4J_PASSWORD || 'localgraph'
   ),
   {
-    encrypted: process.env.NEO4J_ENCRYPTED ? 'ENCRYPTION_OFF' : 'ENCRYPTION_ON',
+    encrypted: process.env.NEO4J_ENCRYPTED ? 'ENCRYPTION_ON' : 'ENCRYPTION_OFF',
   }
 )
 
