@@ -14,9 +14,9 @@ dotenv.config()
 
 const develop = process.env.NODE_EVN === 'development';
 
-const userName = develop ? process.env.NEO4J_USER : 'neo4j';
-const passWord = develop ? process.env.NEO4J_PASSWORD : 'localgraph';
-const URI = develop ? process.env.NEO4J_URI : 'bolt://localhost:7687';
+const userName = develop ? 'neo4j' : process.env.NEO4J_USER;
+const passWord = develop ? 'localgraph' : process.env.NEO4J_PASSWORD;
+const URI = develop ? 'bolt://localhost:7687' : process.env.NEO4J_URI;
 
 const driver = neo4j.driver(
   URI,
@@ -100,10 +100,7 @@ server.applyMiddleware({app, path})
 const httpServer = http.createServer(app);
 // server.installSubscriptionHandlers(httpServer);
 
-const { GRAPHQL_SERVER_PORT, GRAPHQL_SERVER_PATH, GRAPHQL_SERVER_HOST } = process.env;
-console.log(GRAPHQL_SERVER_HOST, GRAPHQL_SERVER_PATH, GRAPHQL_SERVER_PORT)
-
 httpServer.listen({ host, port, path}, () => {
-  console.log(`GraphQL server ready at https://${host}:${port}${path}`)
+  console.log(`GraphQL server ready at http://${host}:${port}${path}`)
   // console.log(`🚀 Subscriptions ready at ws://${host}:${PORT}${server.subscriptionsPath}`)
 })
