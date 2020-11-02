@@ -1,13 +1,13 @@
 import { typeDefs } from './graphql-schema'
-import {PubSub, SchemaDirectiveVisitor} from 'apollo-server'
+import {PubSub, SchemaDirectiveVisitor, ApolloServer} from 'apollo-server'
 import neo4j from 'neo4j-driver'
 import { makeAugmentedSchema } from 'neo4j-graphql-js'
 import dotenv from 'dotenv'
-import http from 'http';
-import { ApolloServer } from 'apollo-server-express'
+// import http from 'http';
+// import { ApolloServer } from 'apollo-server-express'
 import express from 'express'
 
-const app = express();
+// const app = express();
 
 // set environment variables from .env
 dotenv.config()
@@ -92,12 +92,12 @@ const port = process.env.GRAPHQL_SERVER_PORT || 4000
 const path = process.env.GRAPHQL_SERVER_PATH || '/graphql'
 const host = process.env.GRAPHQL_SERVER_HOST || 'http://localhost'
 
-server.applyMiddleware({ app })
+// server.applyMiddleware({ app })
 
-const httpServer = http.createServer(app);
+// const httpServer = http.createServer(app);
 // server.installSubscriptionHandlers(httpServer);
 
-httpServer.listen({port, path, host }, () => {
-  console.log(`GraphQL server ready at ${host}:${port}${path}`)
+server.listen({port}, () => {
+  console.log(`GraphQL server ready at http://localhost:${port}`)
   // console.log(`🚀 Subscriptions ready at ws://${host}:${PORT}${server.subscriptionsPath}`)
-})
+});
