@@ -1,13 +1,12 @@
 import { typeDefs } from './graphql-schema'
-import {PubSub, SchemaDirectiveVisitor} from 'apollo-server'
+import {PubSub, SchemaDirectiveVisitor, ApolloServer} from 'apollo-server'
 import neo4j from 'neo4j-driver'
 import { makeAugmentedSchema } from 'neo4j-graphql-js'
 import dotenv from 'dotenv'
 import http from 'http';
-import { ApolloServer } from 'apollo-server-express'
 import express from 'express'
 
-const app = express();
+// const app = express();
 
 // set environment variables from .env
 dotenv.config()
@@ -19,7 +18,7 @@ const driver = neo4j.driver(
     process.env.NEO4J_PASSWORD || 'localgraph'
   ),
   {
-    encrypted: process.env.NEO4J_ENCRYPTED ? 'ENCRYPTION_ON' : 'ENCRYPTION_OFF',
+    encrypted: 'ENCRYPTION_OFF'
   }
 )
 
@@ -89,12 +88,16 @@ const port = process.env.GRAPHQL_SERVER_PORT || 4000
 const path = process.env.GRAPHQL_SERVER_PATH || '/graphql'
 const host = process.env.GRAPHQL_SERVER_HOST || 'http://localhost'
 
-server.applyMiddleware({app, path})
+// server.applyMiddleware({app, path})
 
-const httpServer = http.createServer(app);
+// const httpServer = http.createServer(app);
 // server.installSubscriptionHandlers(httpServer);
 
-app.listen({ port }, () => {
-  console.log(`GraphQL server ready at ${port}`)
-  // console.log(`🚀 Subscriptions ready at ws://${host}:${PORT}${server.subscriptionsPath}`)
-})
+server.listen({ port }).then(({ url } ) => {
+  console.log(`GraphQL API read at ${url}`)
+});
+
+// server.listen({ port }, () => {
+//   console.log(`GraphQL server ready at ${port}`)
+//   // console.log(`🚀 Subscriptions ready at ws://${host}:${PORT}${server.subscriptionsPath}`)
+// })
