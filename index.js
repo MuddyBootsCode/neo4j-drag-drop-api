@@ -91,10 +91,10 @@ const path = process.env.GRAPHQL_SERVER_PATH || '/graphql'
 
 server.applyMiddleware({ app })
 
-const httpServer = http.createServer(app);
+// const httpServer = http.createServer(app);
 // server.installSubscriptionHandlers(httpServer);
 
-httpServer.listen({ port }, () => {
+app.listen({ port }, () => {
   console.log(`GraphQL server ready at ${port}`)
   // console.log(`🚀 Subscriptions ready at ws://${host}:${PORT}${server.subscriptionsPath}`)
 })
