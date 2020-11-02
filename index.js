@@ -83,20 +83,21 @@ const server = new ApolloServer({
   schema: augmentedSchema,
   introspection: true,
   playground: {
+    enabled: true,
     endpointUrl: '/graphql'
   }
 })
 
 const port = process.env.GRAPHQL_SERVER_PORT || 4000
 const path = process.env.GRAPHQL_SERVER_PATH || '/graphql'
-// const host = process.env.GRAPHQL_SERVER_HOST || 'http://localhost'
+const host = process.env.GRAPHQL_SERVER_HOST || 'http://localhost'
 
 server.applyMiddleware({ app })
 
-// const httpServer = http.createServer(app);
+const httpServer = http.createServer(app);
 // server.installSubscriptionHandlers(httpServer);
 
-app.listen({port}, () => {
-  console.log(`GraphQL server ready at ${port}`)
+httpServer.listen({port, path, host }, () => {
+  console.log(`GraphQL server ready at ${host}:${port}${path}`)
   // console.log(`🚀 Subscriptions ready at ws://${host}:${PORT}${server.subscriptionsPath}`)
 })
