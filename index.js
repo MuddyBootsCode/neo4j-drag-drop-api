@@ -3,11 +3,6 @@ import {PubSub, SchemaDirectiveVisitor, ApolloServer} from 'apollo-server'
 import neo4j from 'neo4j-driver'
 import { makeAugmentedSchema } from 'neo4j-graphql-js'
 import dotenv from 'dotenv'
-// import http from 'http';
-// import { ApolloServer } from 'apollo-server-express'
-import express from 'express'
-
-// const app = express();
 
 // set environment variables from .env
 dotenv.config()
@@ -82,15 +77,10 @@ const server = new ApolloServer({
   },
   schema: augmentedSchema,
   introspection: true,
-  playground: {
-    enabled: true,
-    endpointUrl: '/graphql'
-  }
+  playground: true
 })
 
 const port = process.env.GRAPHQL_SERVER_PORT || 4000
-const path = process.env.GRAPHQL_SERVER_PATH || '/graphql'
-const host = process.env.GRAPHQL_SERVER_HOST || 'http://localhost'
 
 // server.applyMiddleware({ app })
 
