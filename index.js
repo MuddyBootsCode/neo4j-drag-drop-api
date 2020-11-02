@@ -82,7 +82,9 @@ const server = new ApolloServer({
   },
   schema: augmentedSchema,
   introspection: true,
-  playground: true,
+  playground: {
+    endpointUrl: '/graphql'
+  }
 })
 
 const port = process.env.GRAPHQL_SERVER_PORT || 4000
