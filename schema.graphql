@@ -1,10 +1,65 @@
 directive @subscribe on FIELD_DEFINITION
 directive @publish(to: String!) on FIELD_DEFINITION | OBJECT
 
-type User @isAuthenticated {
-id: ID!
-firstName: String!
-lastName: String!
+type User {
+    id: ID!
+    firstName: String!
+    lastName: String!
+    mailingAddress: String
+    streetAddress: String
+    city: String
+    state: String
+    zipcode: String
+    phoneNumber1: String
+    phoneNumber2: String
+    dateOfBirth: String
+    email: String
+    currentPassport: Boolean
+    multiLingual: Boolean
+    cldrTrained: Boolean
+    partnerAgency: String
+    cclsCertification: String
+    yearsExperience: String
+    shirtSize: String
+    preferredAirport: Airport @relation(name: "AIRPORT", direction: "OUT")
+    specialSkills: String
+    workingPreschoolChildren: String
+    workingSchoolAgeChildren: String
+    workingAdolescents: String
+    workingSpecialNeeds: String
+    workingParents: String
+    usingTech: String
+    workingHighStress: String
+    workingPhysical: String
+    griefAndLoss: String
+    workingTrauma: String
+    workingCopingTechniques: String
+    workingNaturalDisasters: String
+    workingManMadeDisasters: String
+    adminNotes: String
+    speaks: [Language] @relation(name: "SPEAKS", direction: "OUT")
+}
+
+type Airport {
+    code: String
+    lat: String
+    lon: String
+    name: String
+    city: String
+    state: String
+    country: String
+    woeid: String
+    tz: String
+    type: String
+    email: String
+    url: String
+    preferrdedBy: User @relation(name: "AIRPORT", direction: "IN")
+}
+
+type Language {
+    name: String
+    proficency: String
+    speaks: User @relation(name: "SPEAKS", direction: "IN")
 }
 
 type Task {
