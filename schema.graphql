@@ -37,7 +37,7 @@ type User {
     workingNaturalDisasters: String
     workingManMadeDisasters: String
     adminNotes: String
-    speaks: [Language] @relation(name: "SPEAKS", direction: "OUT")
+    speaks: [Speaks]
     livesIn: State @relation(name: "LIVES_IN", direction: "OUT")
 }
 
@@ -65,8 +65,7 @@ type Airport {
 
 type Language {
     name: String
-    proficency: String
-    speaks: User @relation(name: "SPEAKS", direction: "IN")
+    spokenBy: [Speaks]
 }
 
 type Task {
@@ -90,6 +89,13 @@ type Table {
     columnOrder: [ID]
 }
 
+type Speaks @relation(name: "SPEAKS") {
+    id: ID
+    from: User
+    to: Language
+    level: String
+}
+
 type Subscription {
     taskAdded: Task @subscribe
 }
@@ -100,8 +106,13 @@ type Mutation {
         statement: "CREATE (t:Task { id: $taskId, content: $taskContent }) with t MATCH(c:Column {id: $columnId}) CREATE(c)<-[:BELONGS_TO]-(t) set c.taskIds = c.taskIds + t.id return t"
     )
 
-    addUserState(userId: ID!, stateName: String!, stateAbbreviation: String!): State
+    addUserState(userId: ID!, stateName: String!, stateAbbreviation: String!): User
     @cypher (
-        statement: "MATCH (u:User {id: $userId}) MERGE (u)-[:LIVES_IN]->(s:State {name: $stateName, abbreviation: $stateAbbreviation}) return s"
+        statement: "MATCH (u:User {id: $userId}) MERGE (s:State {name: $stateName, abbreviation: $stateAbbreviation}) MERGE (u)-[:LIVES_IN]->(s) return u"
+    )
+
+    addUserLanguages(userId: ID!, languageName: String!, level: String!): User
+    @cypher (
+        statement: "MATCH (u:User {id: $userId}) MERGE (l:Language {name: $languageName}) MERGE (u)-[:SPEAKS {level: $level, id: randomUUID()}]->(l) return u"
     )
 }
