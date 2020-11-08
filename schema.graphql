@@ -14,9 +14,9 @@ type User {
     phoneNumber2: String
     dateOfBirth: String
     email: String
-    currentPassport: Boolean
-    multiLingual: Boolean
-    cldrTrained: Boolean
+    currentPassport: String
+    multiLingual: String
+    cldrTrained: String
     partnerAgency: String
     cclsCertification: String
     yearsExperience: String
