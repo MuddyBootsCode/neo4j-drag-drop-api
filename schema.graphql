@@ -113,6 +113,6 @@ type Mutation {
 
     addUserLanguages(userId: ID!, languageName: String!, level: String!): User
     @cypher (
-        statement: "MATCH (u:User {id: $userId}) MERGE (l:Language {name: $languageName}) MERGE (u)-[:SPEAKS {level: $level, id: randomUUID()}]->(l) return u"
+        statement: "MATCH (u:User {id: $userId}) MERGE (l:Language {name: $languageName}) MERGE (u)-[:SPEAKS {level: $level}]->(l) return u"
     )
 }
