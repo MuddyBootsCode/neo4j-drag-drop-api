@@ -55,11 +55,6 @@ type Airport {
     city: String
     state: String
     country: String
-    woeid: String
-    tz: String
-    type: String
-    email: String
-    url: String
     preferrdedBy: User @relation(name: "AIRPORT", direction: "IN")
 }
 
@@ -114,5 +109,10 @@ type Mutation {
     addUserLanguages(userId: ID!, languageName: String!, level: String!): User
     @cypher (
         statement: "MATCH (u:User {id: $userId}) MERGE (l:Language {name: $languageName}) MERGE (u)-[:SPEAKS {level: $level}]->(l) return u"
+    )
+
+    addUserAirport(userId: ID!, lat: String, long: String, code: String, city: String, state: String, country: String, name: String): User
+    @cypher (
+        statement: "MATCH (u:User {id: $userId}) MERGE (a:Airport {name: $name, lat: $lat, long: $long, city: $city, state: $state, code: $code, country: $country}) MERGE (u)-[:AIRPORT]->(a) return u"
     )
 }
