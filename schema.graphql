@@ -39,12 +39,22 @@ type User {
     adminNotes: String
     speaks: [Speaks]
     livesIn: State @relation(name: "LIVES_IN", direction: "OUT")
+    depolyments: [Deployment] @relation(name: "DEPLOYED", direction: "OUT")
+}
+
+type Deployment {
+    id: ID!
+    startDate: String!
+    endDate: String!
+    location: String!
+    teamMembers: [User] @relation(name: "DEPLOYED", direction: "IN")
+
 }
 
 type State {
     name: String
     abbreviation: String
-    livesIn: User @relation(name: "LIVES_IN", direction: "IN")
+    livesIn: [User] @relation(name: "LIVES_IN", direction: "IN")
 }
 
 type Airport {
@@ -55,7 +65,7 @@ type Airport {
     city: String
     state: String
     country: String
-    preferrdedBy: User @relation(name: "AIRPORT", direction: "IN")
+    preferrdedBy: [User] @relation(name: "AIRPORT", direction: "IN")
 }
 
 type Language {
@@ -90,6 +100,7 @@ type Speaks @relation(name: "SPEAKS") {
     to: Language
     level: String
 }
+
 
 type Subscription {
     taskAdded: Task @subscribe
