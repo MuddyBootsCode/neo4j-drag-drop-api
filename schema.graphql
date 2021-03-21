@@ -48,6 +48,9 @@ type Deployment {
     endDate: String!
     location: String!
     teamMembers: [User] @relation(name: "DEPLOYED", direction: "IN")
+    passportRequired: String
+    multiLingaulRequired: String
+    languageRequried: Language
 
 }
 
