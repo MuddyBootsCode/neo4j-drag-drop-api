@@ -1,80 +1,4 @@
-directive @subscribe on FIELD_DEFINITION
-directive @publish(to: String!) on FIELD_DEFINITION | OBJECT
 scalar JSON
-
-type User {
-    id: ID!
-    firstName: String!
-    lastName: String!
-    mailingAddress: String
-    streetAddress: String
-    city: String
-    zipcode: String
-    phoneNumber1: String
-    phoneNumber2: String
-    dateOfBirth: String
-    email: String
-    currentPassport: String
-    multiLingual: String
-    cldrTrained: String
-    partnerAgency: String
-    cclsCertification: String
-    yearsExperience: String
-    shirtSize: String
-    preferredAirport: Airport @relation(name: "AIRPORT", direction: "OUT")
-    specialSkills: String
-    workingPreschoolChildren: String
-    workingSchoolAgeChildren: String
-    workingAdolescents: String
-    workingSpecialNeeds: String
-    workingParents: String
-    usingTech: String
-    workingHighStress: String
-    workingPhysical: String
-    griefAndLoss: String
-    workingTrauma: String
-    workingCopingTechniques: String
-    workingNaturalDisasters: String
-    workingManMadeDisasters: String
-    adminNotes: String
-    speaks: [Speaks]
-    livesIn: State @relation(name: "LIVES_IN", direction: "OUT")
-    depolyments: [Deployment] @relation(name: "DEPLOYED", direction: "OUT")
-}
-
-type Deployment {
-    id: ID!
-    startDate: String!
-    endDate: String!
-    location: String!
-    teamMembers: [User] @relation(name: "DEPLOYED", direction: "IN")
-    passportRequired: String
-    multiLingaulRequired: String
-    languageRequried: Language
-
-}
-
-type State {
-    name: String
-    abbreviation: String
-    livesIn: [User] @relation(name: "LIVES_IN", direction: "IN")
-}
-
-type Airport {
-    code: String
-    lat: String
-    lon: String
-    name: String
-    city: String
-    state: String
-    country: String
-    preferrdedBy: [User] @relation(name: "AIRPORT", direction: "IN")
-}
-
-type Language {
-    name: String
-    spokenBy: [Speaks]
-}
 
 type Task {
     id: ID!
@@ -97,36 +21,9 @@ type Table {
     columnOrder: [ID]
 }
 
-type Speaks @relation(name: "SPEAKS") {
-    id: ID
-    from: User
-    to: Language
-    level: String
-}
-
-
-type Subscription {
-    taskAdded: Task @subscribe
-}
-
 type Mutation {
-    addTask(taskContent: String!, columnId: ID!, taskId: ID!): Task @publish(to: "taskAdded")
+    addTask(taskContent: String!, columnId: ID!, taskId: ID!): Task
     @cypher (
         statement: "CREATE (t:Task { id: $taskId, content: $taskContent }) with t MATCH(c:Column {id: $columnId}) CREATE(c)<-[:BELONGS_TO]-(t) set c.taskIds = c.taskIds + t.id return t"
-    )
-
-    addUserState(userId: ID!, stateName: String!, stateAbbreviation: String!): User
-    @cypher (
-        statement: "MATCH (u:User {id: $userId}) MERGE (s:State {name: $stateName, abbreviation: $stateAbbreviation}) MERGE (u)-[:LIVES_IN]->(s) return u"
-    )
-
-    addUserLanguages(userId: ID!, languageName: String!, level: String!): User
-    @cypher (
-        statement: "MATCH (u:User {id: $userId}) MERGE (l:Language {name: $languageName}) MERGE (u)-[:SPEAKS {level: $level}]->(l) return u"
-    )
-
-    addUserAirport(userId: ID!, lat: String, long: String, code: String, city: String, state: String, country: String, name: String): User
-    @cypher (
-        statement: "MATCH (u:User {id: $userId}) MERGE (a:Airport {name: $name, lat: $lat, long: $long, city: $city, state: $state, code: $code, country: $country}) MERGE (u)-[:AIRPORT]->(a) return u"
     )
 }

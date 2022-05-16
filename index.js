@@ -1,5 +1,5 @@
 import { typeDefs } from './graphql-schema'
-import {PubSub, SchemaDirectiveVisitor, ApolloServer} from 'apollo-server'
+import {ApolloServer} from 'apollo-server'
 import neo4j from 'neo4j-driver'
 import { makeAugmentedSchema } from 'neo4j-graphql-js'
 import dotenv from 'dotenv'
@@ -18,51 +18,8 @@ const driver = neo4j.driver(
   }
 )
 
-const pubsub = new PubSub();
-
-export class SubscribeDirective extends SchemaDirectiveVisitor {
-  visitFieldDefinition(field) {
-    field.subscribe = () => pubsub.asyncIterator(field.name);
-  }
-
-  visitObject(object) {
-    return super.visitObject(object);
-  }
-}
-
-export class PublishDirective extends SchemaDirectiveVisitor {
-  visitFieldDefinition(field) {
-    const { to } = this.args;
-    const { resolve } = field;
-    field.resolve = (...args) => {
-      const data = resolve.apply(this, args);
-      pubsub.publish(to, { [to]: data });
-      return data;
-    };
-  }
-
-  visitObject(object) {
-    const { to } = this.args;
-    const fields = object.getFields();
-    Object.keys(fields).forEach((fieldName) => {
-      const field = fields[fieldName];
-      const next = field.resolve;
-
-      field.resolve = (result, args, context, info) => {
-        pubsub.publish(to, {[to]: result})
-        return next(result, args, context, info);
-      }
-    })
-  }
-}
-
 const augmentedSchema = makeAugmentedSchema({
   typeDefs,
-  schemaDirectives: {
-    subscribe: SubscribeDirective,
-    publish: PublishDirective
-
-  },
   config: {
     auth: {
       isAuthenticated: true,
@@ -82,12 +39,6 @@ const server = new ApolloServer({
 
 const port = process.env.GRAPHQL_SERVER_PORT || 4000
 
-// server.applyMiddleware({ app })
-
-// const httpServer = http.createServer(app);
-// server.installSubscriptionHandlers(httpServer);
-
 server.listen({port}, () => {
   console.log(`GraphQL server ready at http://localhost:${port}`)
-  // console.log(`🚀 Subscriptions ready at ws://${host}:${PORT}${server.subscriptionsPath}`)
 });
